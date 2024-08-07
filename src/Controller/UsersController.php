@@ -48,7 +48,16 @@ class UsersController extends AppController
     {
         $user = $this->Users->newEmptyEntity();
         if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
+            $data = $this->request->getData();
+
+            /** @var \Laminas\Diactoros\UploadedFile $fileObject */
+            $fileObject = $data['picture'];
+            unset($data['picture']);
+
+            $data['picture'] = WWW_ROOT . 'uploaded_files' . DS .  $fileObject->getClientFilename();
+            $fileObject->moveTo(WWW_ROOT . 'uploaded_files' . DS . $fileObject->getClientFilename());
+
+            $user = $this->Users->patchEntity($user, $data);
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('The user has been saved.'));
 
